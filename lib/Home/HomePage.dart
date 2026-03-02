@@ -243,21 +243,8 @@ class _HomepageState extends State<Homepage> with TickerProviderStateMixin {
               floating: true,
               pinned: true,
               centerTitle: false,
-              title: Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFFFF6B35),
-                    width: 2,
-                  ),
-                ),
-                child: CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.grey.shade700,
-                  backgroundImage: const AssetImage('assets/image/boy.png'),
-                ),
-              ),
+              title:Image.asset("assets/image/logo.png",
+              height: 100,),
               actions: [
                 // Search button
                 Padding(

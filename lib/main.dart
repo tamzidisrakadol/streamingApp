@@ -1,29 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:streaming_app/Home/HomePage.dart';
-import 'package:streaming_app/Splash/SplashScreen.dart';
+import 'package:streaming_app/Service/firebase/firebase_initializer.dart';
+import 'package:streaming_app/config/di/injection_container.dart';
+import 'package:streaming_app/config/routes/app_router.dart';
+import 'package:streaming_app/config/theme/app_theme.dart';
+import 'package:streaming_app/core/constants/app_strings.dart';
 
-import 'Service/firebase/firebase_initializer.dart';
-
-//color : 121212
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
   await FirebaseInitializer.initialize();
+
+  // Initialize dependency injection (includes Hive initialization)
+  await setupDependencyInjection();
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: AppStrings.appName,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const Homepage(),
+      theme: AppTheme.darkTheme,
+      initialRoute: AppRoutes.splash,
+      onGenerateRoute: AppRouter.generateRoute,
     );
   }
 }
