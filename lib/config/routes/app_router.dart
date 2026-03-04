@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:streaming_app/Profile/OnBoardProfile.dart';
 import 'package:streaming_app/config/di/injection_container.dart';
 import 'package:streaming_app/features/authentication/presentation/bloc/auth_bloc.dart';
 import 'package:streaming_app/features/authentication/presentation/bloc/auth_event.dart';
@@ -12,6 +13,7 @@ class AppRoutes {
 
   static const String splash = '/';
   static const String login = '/login';
+  static const String onBoard = '/onboard';
   static const String home = '/home';
   static const String streamViewer = '/stream-viewer';
   static const String profile = '/profile';
@@ -36,6 +38,11 @@ class AppRouter {
             create: (_) => getIt<AuthBloc>()..add(const CheckAuthStatus()),
             child: const LoginPage(),
           ),
+        );
+
+      case AppRoutes.onBoard:
+        return MaterialPageRoute(
+          builder: (_) => const OnBoardProfile(),
         );
 
       case AppRoutes.home:

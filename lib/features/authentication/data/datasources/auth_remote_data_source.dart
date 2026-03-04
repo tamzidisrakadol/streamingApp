@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:streaming_app/core/constants/api_constants.dart';
 import 'package:streaming_app/core/error/exceptions.dart';
 import 'package:streaming_app/core/network/dio_client.dart';
 import 'package:streaming_app/features/authentication/data/models/user_model.dart';
@@ -12,9 +13,6 @@ abstract class AuthRemoteDataSource {
 
   /// Logout
   Future<void> logout();
-
-  /// Get current Firebase user
-  UserModel? getCurrentFirebaseUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -44,54 +42,50 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // Obtain auth details from request
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      // ============================================
-      // LOG TOKENS (for backend API use)
-      // ============================================
+      final accessToken = googleAuth.accessToken;
+
+      if (accessToken == null) {
+        throw const AuthException(
+          message: 'Failed to get access token from Google',
+          code: 'no_access_token',
+        );
+      }
+
       print('==================== GOOGLE AUTH TOKENS ====================');
-      print('Access Token: ${googleAuth.accessToken}');
-      print('ID Token: ${googleAuth.idToken}');
+      print('Access Token: $accessToken');
       print('===========================================================');
 
-      // TODO: Send tokens to backend API to get user data
-      // Example:
-      // final response = await dioClient.post('/auth/google', data: {
-      //   'accessToken': googleAuth.accessToken,
-      //   'idToken': googleAuth.idToken,
-      // });
-      // final userModel = UserModel.fromJson(response.data);
-      // return userModel;
-
-      // TEMPORARY: Throw exception since we don't have backend API yet
-      throw const AuthException(
-        message: 'Backend API integration pending. Tokens logged to console.',
-        code: 'backend_not_implemented',
+      // Send access token to backend API
+      final response = await dioClient.post(
+        ApiConstants.auth,
+        data: {'token': accessToken},
       );
 
-      // ============================================
-      // OLD CODE (keeping for reference - Firebase authentication)
-      // ============================================
-      // Create a new credential
-      // final credential = firebase_auth.GoogleAuthProvider.credential(
-      //   accessToken: googleAuth.accessToken,
-      //   idToken: googleAuth.idToken,
-      // );
+      print('==================== BACKEND RESPONSE ====================');
+      print('Response: ${response.data}');
+      print('=========================================================');
 
-      // Sign in to Firebase with the credential
-      // final userCredential =
-      //     await firebaseAuth.signInWithCredential(credential);
+      // Parse response - response.data contains the JSON body
+      final responseData = response.data as Map<String, dynamic>;
+      final data = responseData['data'] as Map<String, dynamic>;
+      final jwtToken = data['token'] as String;
 
-      // if (userCredential.user == null) {
-      //   throw const AuthException(
-      //     message: 'Failed to sign in with Google',
-      //     code: 'sign_in_failed',
-      //   );
-      // }
+      // Check if user data exists in response
+      if (data.containsKey('user') && data['user'] != null) {
+        // Existing user - has full user data
+        final userJson = data['user'] as Map<String, dynamic>;
+        final userModel = UserModel.fromJson(userJson);
 
-      // Convert Firebase user to UserModel
-      // final userModel =
-      //     UserModel.fromFirebaseUser(userCredential.user!);
-
-      // return userModel;
+        print('✅ Existing user authenticated: ${userModel.email}');
+        return userModel;
+      } else {
+        // New user - only JWT token returned, needs onboarding
+        print('🆕 New user detected - needs onboarding');
+        throw NewUserException(
+          message: 'New user needs to complete onboarding',
+          jwtToken: jwtToken,
+        );
+      }
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw AuthException(
         message: e.message ?? 'Firebase authentication failed',
@@ -99,6 +93,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
     } catch (e) {
       if (e is AuthException) rethrow;
+      if (e is NewUserException) rethrow;
+      if (e is ServerException) rethrow;
       throw AuthException(message: 'Google Sign In failed: $e');
     }
   }
@@ -114,11 +110,5 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       throw AuthException(message: 'Logout failed: $e');
     }
-  }
-
-  @override
-  UserModel? getCurrentFirebaseUser() {
-    final user = firebaseAuth.currentUser;
-    return user != null ? UserModel.fromFirebaseUser(user) : null;
   }
 }

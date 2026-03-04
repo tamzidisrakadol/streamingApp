@@ -58,3 +58,16 @@ class ValidationException implements Exception {
   @override
   String toString() => 'ValidationException(message: $message, errors: $errors)';
 }
+
+class NewUserException implements Exception {
+  final String message;
+  final String jwtToken;
+
+  const NewUserException({
+    required this.message,
+    required this.jwtToken,
+  });
+
+  @override
+  String toString() => 'NewUserException(message: $message)';
+}

@@ -29,14 +29,27 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     try {
-      // 1. Authenticate with Firebase (remote)
+      // 1. Authenticate with backend API
       final userModel = await remoteDataSource.loginWithGoogle();
 
-      // 2. Cache user locally
+      // 2. Save JWT token (already saved by remote data source in NewUserException case)
+      // For existing users, we get the full user model here
+
+      // 3. Cache user locally
       await localDataSource.cacheUser(userModel);
 
-      // 3. Return entity
+      // 4. Return entity
       return Right(userModel.toEntity());
+    } on NewUserException catch (e) {
+      // New user detected - save JWT token only, don't cache user yet
+      print('🔑 Saving JWT token for new user...');
+      await localDataSource.saveAuthToken(e.jwtToken);
+
+      // Return NewUserFailure to signal BLoC that onboarding is needed
+      return Left(NewUserFailure(
+        errorMessage: e.message,
+        jwtToken: e.jwtToken,
+      ));
     } on AuthException catch (e) {
       return Left(AuthFailure(errorMessage: e.message, code: e.code));
     } on ServerException catch (e) {

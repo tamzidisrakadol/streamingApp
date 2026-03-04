@@ -91,8 +91,21 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           child: BlocConsumer<AuthBloc, AuthState>(
             listener: (context, state) {
               if (state is AuthAuthenticated) {
-                // Navigate to home page
+                // Existing user - Navigate to home page
+                print('✅ LoginPage: Navigating to home (existing user)');
                 AppRouter.pushAndRemoveUntil(context, AppRoutes.home);
+              } else if (state is AuthNeedsOnboarding) {
+                // New user - Navigate to onboarding (when implemented)
+                print('🆕 LoginPage: New user needs onboarding');
+                // TODO: Navigate to onboarding screen when implemented
+                // AppRouter.pushAndRemoveUntil(context, AppRoutes.onboarding);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('New user! Onboarding screen coming soon...'),
+                    backgroundColor: Colors.blue,
+                    duration: Duration(seconds: 3),
+                  ),
+                );
               } else if (state is AuthError) {
                 // Show error message
                 ScaffoldMessenger.of(context).showSnackBar(

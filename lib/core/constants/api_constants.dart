@@ -3,7 +3,7 @@ class ApiConstants {
   ApiConstants._();
 
   // Base URLs
-  static const String baseUrl = 'https://api.yourbackend.com'; // TODO: Update with actual API URL
+  static const String baseUrl = 'https://aura-backend-jezt.onrender.com/api/v1/';
   static const String socketUrl = 'https://chat.yourbackend.com'; // TODO: Update with actual Socket URL
 
   // Timeouts
@@ -11,11 +11,10 @@ class ApiConstants {
   static const Duration receiveTimeout = Duration(seconds: 30);
 
   // API Endpoints - Authentication
-  static const String login = '/auth/login';
-  static const String register = '/auth/register';
-  static const String logout = '/auth/logout';
-  static const String refreshToken = '/auth/refresh';
-  static const String me = '/auth/me';
+  static const String auth = 'auth'; // Google Sign-In authentication
+  static const String onboard = 'auth/onboard'; // Complete user profile after sign-in
+  static const String logout = 'auth/logout';
+  static const String me = 'auth/me';
 
   // API Endpoints - Streams
   static const String streams = '/streams';

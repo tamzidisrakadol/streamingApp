@@ -62,7 +62,14 @@ Future<void> setupDependencyInjection() async {
   // Firebase services
   getIt.registerSingleton<FirebaseAuth>(FirebaseAuth.instance);
   getIt.registerSingleton<FirebaseFirestore>(FirebaseFirestore.instance);
-  getIt.registerSingleton<GoogleSignIn>(GoogleSignIn());
+
+  // Google Sign In with Web Client ID
+  getIt.registerSingleton<GoogleSignIn>(
+    GoogleSignIn(
+    serverClientId: '487978615621-d6f51hd7tjsuh4943us59pfd4t5tsqos.apps.googleusercontent.com',
+      scopes: ['email', 'profile'],
+    ),
+  );
 
   // Hive boxes
   getIt.registerSingleton<Box>(

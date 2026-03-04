@@ -99,3 +99,22 @@ class ValidationFailure extends Failure {
   @override
   String toString() => 'ValidationFailure(message: $errorMessage, errors: $errors)';
 }
+
+class NewUserFailure extends Failure {
+  final String errorMessage;
+  final String jwtToken;
+
+  const NewUserFailure({
+    required this.errorMessage,
+    required this.jwtToken,
+  });
+
+  @override
+  List<Object?> get props => [errorMessage, jwtToken, ...super.props];
+
+  @override
+  String get message => errorMessage;
+
+  @override
+  String toString() => 'NewUserFailure(message: $errorMessage)';
+}

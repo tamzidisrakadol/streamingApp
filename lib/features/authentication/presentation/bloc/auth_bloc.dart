@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:streaming_app/core/error/failures.dart';
 import 'package:streaming_app/core/usecases/usecase.dart';
 import 'package:streaming_app/features/authentication/domain/usecases/get_current_user.dart';
 import 'package:streaming_app/features/authentication/domain/usecases/login_with_google.dart';
@@ -42,19 +43,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     LoginWithGoogleRequested event,
     Emitter<AuthState> emit,
   ) async {
-    print('🔵 AuthBloc: LoginWithGoogleRequested event received');
     emit(const AuthLoading());
-    print('🔵 AuthBloc: Emitted AuthLoading state');
-
     final result = await loginWithGoogle(NoParams());
-    print('🔵 AuthBloc: Login result received');
-
     result.fold(
       (failure) {
-        print('🔴 AuthBloc: Login failed - ${failure.message}');
-        emit(AuthError(failure.message));
-        // Return to unauthenticated state after showing error
-        emit(const AuthUnauthenticated());
+        // Check if it's a new user that needs onboarding
+        if (failure is NewUserFailure) {
+          print('🆕 AuthBloc: New user detected - needs onboarding');
+          emit(AuthNeedsOnboarding(failure.jwtToken));
+        } else {
+          print('🔴 AuthBloc: Login failed - ${failure.message}');
+          emit(AuthError(failure.message));
+          // Return to unauthenticated state after showing error
+          emit(const AuthUnauthenticated());
+        }
       },
       (user) {
         print('🟢 AuthBloc: Login successful - ${user.email}');
