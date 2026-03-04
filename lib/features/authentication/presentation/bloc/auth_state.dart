@@ -43,3 +43,13 @@ class AuthError extends AuthState {
   @override
   List<Object?> get props => [message];
 }
+
+/// Needs onboarding state - new user needs to complete profile
+class AuthNeedsOnboarding extends AuthState {
+  final String jwtToken;
+
+  const AuthNeedsOnboarding(this.jwtToken);
+
+  @override
+  List<Object?> get props => [jwtToken];
+}

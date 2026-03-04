@@ -72,12 +72,9 @@ class _SplashscreenState extends State<Splashscreen> with TickerProviderStateMix
         builder: (context) {
           return BlocListener<AuthBloc, AuthState>(
             listener: (context, state) {
-              print('📱 SplashScreen: Received state - ${state.runtimeType}');
               if (state is AuthLoading) {
-                print('📱 SplashScreen: Setting loading = true');
                 setState(() => _isLoading = true);
               } else if (state is AuthError) {
-                print('📱 SplashScreen: Error state - ${state.message}');
                 setState(() => _isLoading = false);
                 // Show error message
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -89,12 +86,10 @@ class _SplashscreenState extends State<Splashscreen> with TickerProviderStateMix
                 );
                 print('Auth Error: ${state.message}');
               } else if (state is AuthAuthenticated) {
-                print('📱 SplashScreen: Authenticated state - ${state.user.email}');
                 setState(() => _isLoading = false);
                 // TODO: Navigate to home when backend API is integrated
                 print('Auth Success - User authenticated: ${state.user.email}');
               } else {
-                print('📱 SplashScreen: Other state');
                 setState(() => _isLoading = false);
               }
             },
